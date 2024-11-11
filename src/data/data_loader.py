@@ -1,5 +1,4 @@
 # src/data/data_loader.py
-# edit the schema for importing columns with the correct one
 
 import pandas as pd
 import json
@@ -23,14 +22,14 @@ def process_data(raw_data):
     processed_data = raw_data.copy()
     
     # Convert endTime to datetime
-    processed_data['endTime'] = pd.to_datetime(processed_data['endTime'])
+    processed_data['ts'] = pd.to_datetime(processed_data['ts'])
     
     # Extract time components
-    processed_data['date'] = processed_data['endTime'].dt.date
-    processed_data['hour'] = processed_data['endTime'].dt.hour
-    processed_data['day_of_week'] = processed_data['endTime'].dt.day_name()
-    processed_data['month'] = processed_data['endTime'].dt.month
-    processed_data['year'] = processed_data['endTime'].dt.year
+    processed_data['date'] = processed_data['ts'].dt.date
+    processed_data['hour'] = processed_data['ts'].dt.hour
+    processed_data['day_of_week'] = processed_data['ts'].dt.day_name()
+    processed_data['month'] = processed_data['ts'].dt.month
+    processed_data['year'] = processed_data['ts'].dt.year
     
     return processed_data
 
@@ -51,4 +50,4 @@ if __name__ == "__main__":
     print(f"Total streams: {len(processed_data)}")
     print(f"Date range: {processed_data['date'].min()} to {processed_data['date'].max()}")
     print("\nTop 5 most played tracks:")
-    print(processed_data['trackName'].value_counts().head())
+    print(processed_data['master_metadata_track_name'].value_counts().head())
