@@ -1,17 +1,37 @@
 # Spotify Mood Analysis
 
-## Project Overview
-This project analyzes personal Spotify streaming data to understand music listening patterns and their correlation with moods across different time periods. The analysis includes temporal patterns, genre distributions, and potential mood indicators based on music choices.
+## 📌 Project Overview
+This project analyzes personal Spotify streaming data to explore listening patterns and their potential relationship with mood.  
+It includes temporal trends, genre distributions, and mood-related insights based on music choices across different years.
 
-## Features
-- Temporal analysis of music listening patterns
+## ✨ Features
+- Analysis of temporal listening patterns (daily, weekly, yearly)
 - Genre-based mood correlation
 - Interactive visualizations
-- Spotify API integration
-- Custom dashboard using Streamlit
-- Tableau visualizations
+- Spotify API integration for enriched metadata
+- Streamlit dashboard for easy exploration
+- Tableau visualizations (optional)
 
-## Setup
+## 🗂 Project Structure
+```
+spotify-mood-analysis/
+│
+├── data/
+│   ├── raw/                         # Raw Spotify data (JSONs, PDFs)
+│   ├── processed/                   # Cleaned CSVs and analysis-ready data
+│
+├── src/
+│   ├── data/                        # Data loading & preprocessing scripts
+│   ├── analysis/                    # Scripts for temporal/genre/mood analysis
+│   ├── visualization/               # Streamlit dashboards, Tableau exports
+│
+├── .gitignore
+├── LICENSE
+├── README.md
+```
+
+## ⚙️ Setup
+
 1. Clone the repository
 ```bash
 git clone https://github.com/your-username/spotify-mood-analysis.git
@@ -21,7 +41,10 @@ cd spotify-mood-analysis
 2. Create and activate virtual environment
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 ```
 
 3. Install dependencies
@@ -29,45 +52,54 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Configure Spotify API
-- Create a Spotify Developer account
-- Create an application to get API credentials
-- Add credentials to `.env` file (see `.env.example`)
+4. Configure Spotify API credentials  
+   - Create a [Spotify Developer Account](https://developer.spotify.com/)  
+   - Register a new app and obtain **Client ID** and **Client Secret**  
+   - Save them in a `.env` file like this:
+   ```
+   SPOTIFY_CLIENT_ID=your_client_id
+   SPOTIFY_CLIENT_SECRET=your_client_secret
+   ```
 
-## Project Structure
-[Project structure description as shown in earlier artifact]
+## 🚀 Usage
 
-## Usage
-1. Data Collection
+1. **Load Data**
 ```bash
 python src/data/data_loader.py
 ```
 
-2. Run Analysis
+2. **Run Analysis**
 ```bash
 python src/analysis/temporal.py
 python src/analysis/genre_analysis.py
 ```
 
-3. Launch Dashboard
+3. **Launch Dashboard**
 ```bash
 streamlit run src/visualization/dashboard.py
 ```
 
-## Analysis Methodology
-[Briefly describe your approach to analyzing the data and determining mood correlations]
+## 📊 Analysis Methodology
+- **Temporal analysis**: Identify trends in listening frequency and time-of-day patterns.  
+- **Genre analysis**: Map genres to potential moods.  
+- **Mood correlation**: Explore how playlists and artists align with mood categories.  
 
-## Visualizations
-[Screenshots and descriptions of key visualizations]
+## 📈 Visualizations
+- Heatmaps of listening by hour/day  
+- Genre distribution charts  
+- Year-over-year mood shifts  
+- Streamlit dashboard with filters  
 
-## Future Improvements
-- Add more sophisticated mood detection algorithms
-- Incorporate audio features analysis
-- Add machine learning models for pattern recognition
-- Expand visualization capabilities
+_(Screenshots or GIFs of visualizations can be added here)_
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## 🔮 Future Improvements
+- Use Spotify audio features (energy, valence, tempo) for deeper mood inference  
+- Apply ML models to predict mood based on tracks  
+- Add clustering of listening habits  
+- Improve dashboard with personalization options  
 
-## License
+## 🤝 Contributing
+Pull requests are welcome! For major changes, please open an issue to discuss your idea first.
+
+## 📜 License
 [MIT](https://choosealicense.com/licenses/mit/)
