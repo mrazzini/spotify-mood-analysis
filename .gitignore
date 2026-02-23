@@ -146,6 +146,13 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Project-specific
+CLAUDE.md
+.claude/
+data/.env
+data/processed/lastfm_tags_cache.json
+data/processed/enriched_streaming_data.csv
+
 # pytype static type analyzer
 .pytype/
 

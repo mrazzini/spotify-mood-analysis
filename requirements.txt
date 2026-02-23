@@ -1,0 +1,6 @@
+pandas
+aiohttp
+python-dotenv
+streamlit
+plotly
+tqdm
