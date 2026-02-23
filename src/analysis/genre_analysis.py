@@ -101,6 +101,25 @@ def mood_by_year(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # Genre distributions
 # ---------------------------------------------------------------------------
+def genre_by_month(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    For each month 1–12, compute the percentage of plays per genre (normalised).
+    Returns [month, month_name, genre, pct].
+    """
+    enriched = _require_enriched(df)
+    genre_df = enriched[enriched["primary_genre"].notna()].copy()
+
+    counts = (
+        genre_df.groupby(["month", "primary_genre"])
+        .size()
+        .reset_index(name="count")
+    )
+    totals = counts.groupby("month")["count"].transform("sum")
+    counts["pct"] = counts["count"] / totals * 100
+    counts["month_name"] = counts["month"].map(MONTH_NAMES)
+    return counts.sort_values(["month", "primary_genre"])
+
+
 def genre_by_year(df: pd.DataFrame) -> pd.DataFrame:
     """
     Genre percentages per year.
@@ -153,6 +172,83 @@ def mood_distribution(df: pd.DataFrame) -> pd.DataFrame:
     )
     counts["pct"] = counts["count"] / counts["count"].sum() * 100
     return counts
+
+
+# ---------------------------------------------------------------------------
+# Genre by day of week and hour of day
+# ---------------------------------------------------------------------------
+DAYS_ORDERED = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+
+def genre_by_day_of_week(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Genre percentages normalised within each day of the week.
+    Returns [day_of_week, genre, pct].
+    """
+    enriched = _require_enriched(df)
+    genre_df = enriched[enriched["primary_genre"].notna()].copy()
+    genre_df["day_of_week"] = pd.Categorical(
+        genre_df["day_of_week"], categories=DAYS_ORDERED, ordered=True
+    )
+
+    counts = (
+        genre_df.groupby(["day_of_week", "primary_genre"], observed=True)
+        .size()
+        .reset_index(name="count")
+    )
+    totals = counts.groupby("day_of_week", observed=True)["count"].transform("sum")
+    counts["pct"] = counts["count"] / totals * 100
+    return counts.sort_values(["day_of_week", "primary_genre"])
+
+
+def genre_by_hour(df: pd.DataFrame, day: str | None = None) -> pd.DataFrame:
+    """
+    Genre percentages normalised within each hour of the day.
+    Optionally filtered to a single day of the week (e.g. 'Tuesday').
+    Returns [hour, genre, pct].
+    """
+    enriched = _require_enriched(df)
+    genre_df = enriched[enriched["primary_genre"].notna()].copy()
+
+    if day is not None:
+        genre_df = genre_df[genre_df["day_of_week"] == day]
+
+    counts = (
+        genre_df.groupby(["hour", "primary_genre"])
+        .size()
+        .reset_index(name="count")
+    )
+    totals = counts.groupby("hour")["count"].transform("sum")
+    counts["pct"] = counts["count"] / totals * 100
+    return counts.sort_values(["hour", "primary_genre"])
+
+
+# ---------------------------------------------------------------------------
+# Top tracks per genre
+# ---------------------------------------------------------------------------
+def top_tracks_per_genre(df: pd.DataFrame, genre: str, n: int = 10) -> pd.DataFrame:
+    """
+    Return the top n tracks for a given genre bucket.
+    Returns [track, artist, play_count].
+    """
+    enriched = _require_enriched(df)
+    genre_df = enriched[enriched["primary_genre"] == genre]
+
+    result = (
+        genre_df.groupby(
+            ["master_metadata_track_name", "master_metadata_album_artist_name"]
+        )
+        .size()
+        .reset_index(name="play_count")
+        .rename(columns={
+            "master_metadata_track_name": "track",
+            "master_metadata_album_artist_name": "artist",
+        })
+        .sort_values("play_count", ascending=False)
+        .head(n)
+        .reset_index(drop=True)
+    )
+    return result
 
 
 # ---------------------------------------------------------------------------

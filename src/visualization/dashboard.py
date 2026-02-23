@@ -6,7 +6,12 @@ Run:
     streamlit run src/visualization/dashboard.py
 """
 
+import sys
 from pathlib import Path
+
+# Ensure project root is on sys.path so `src.*` imports work when run via
+# `streamlit run src/visualization/dashboard.py` or `python -m streamlit run ...`
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import pandas as pd
 import plotly.express as px
@@ -142,7 +147,7 @@ with tab1:
         height=350,
         margin=dict(l=0, r=0, t=10, b=0),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 # ============================================================
@@ -167,7 +172,7 @@ with tab2:
         aspect="auto",
     )
     fig_heat.update_layout(template="plotly_dark", height=320, margin=dict(l=0, r=0, t=10, b=0))
-    st.plotly_chart(fig_heat, use_container_width=True)
+    st.plotly_chart(fig_heat, width="stretch")
 
     col_a, col_b = st.columns(2)
 
@@ -183,7 +188,7 @@ with tab2:
             xaxis_title="", yaxis_title="Plays",
             height=300, margin=dict(l=0, r=0, t=10, b=0),
         )
-        st.plotly_chart(fig_dow, use_container_width=True)
+        st.plotly_chart(fig_dow, width="stretch")
 
     with col_b:
         st.subheader("Monthly Volume")
@@ -220,7 +225,7 @@ with tab2:
                 marker=dict(color=color, size=10, symbol="square"),
                 name=label,
             ))
-        st.plotly_chart(fig_monthly, use_container_width=True)
+        st.plotly_chart(fig_monthly, width="stretch")
 
 
 # ============================================================
@@ -255,7 +260,7 @@ with tab3:
         height=400, margin=dict(l=0, r=0, t=10, b=0),
         legend=dict(orientation="h", y=-0.2),
     )
-    st.plotly_chart(fig_area, use_container_width=True)
+    st.plotly_chart(fig_area, width="stretch")
 
     col_l, col_r = st.columns([1, 1])
 
@@ -277,7 +282,7 @@ with tab3:
             xaxis_title="Plays", yaxis_title="",
             height=380, margin=dict(l=0, r=0, t=10, b=0),
         )
-        st.plotly_chart(fig_topy, use_container_width=True)
+        st.plotly_chart(fig_topy, width="stretch")
 
     with col_r:
         st.subheader("Artist Deep Dive")
@@ -296,7 +301,7 @@ with tab3:
                     xaxis_title="Month", yaxis_title="Plays",
                     height=350, margin=dict(l=0, r=0, t=10, b=0),
                 )
-                st.plotly_chart(fig_hist, use_container_width=True)
+                st.plotly_chart(fig_hist, width="stretch")
                 total = history["play_count"].sum()
                 st.caption(f"Total plays for {artist_search}: {total:,}")
 
@@ -318,11 +323,11 @@ with tab4:
     from src.analysis.genre_analysis import (
         genre_distribution,
         mood_distribution,
-        mood_by_month,
-        mood_by_season,
-        mood_by_year,
         genre_by_year,
-        top_tracks_per_mood,
+        genre_by_month,
+        genre_by_day_of_week,
+        genre_by_hour,
+        top_tracks_per_genre,
     )
 
     # --- Pie + Donut row ---
@@ -336,10 +341,10 @@ with tab4:
             color_discrete_sequence=px.colors.qualitative.Pastel,
         )
         fig_pie.update_layout(template="plotly_dark", height=340, margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width="stretch")
 
     with col2:
-        st.subheader("Mood Distribution")
+        st.subheader("Mood Distribution (reference)")
         mood_dist = mood_distribution(df_enriched)
         fig_donut = px.pie(
             mood_dist, values="count", names="primary_mood",
@@ -347,53 +352,36 @@ with tab4:
             color_discrete_sequence=px.colors.qualitative.Vivid,
         )
         fig_donut.update_layout(template="plotly_dark", height=340, margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig_donut, use_container_width=True)
+        st.plotly_chart(fig_donut, width="stretch")
 
-    # --- Seasonality heatmap (month × mood) ---
-    st.subheader("Mood Seasonality — Monthly Heatmap")
-    st.caption("Percentage of plays per mood within each month (normalised)")
-    mbm = mood_by_month(df_enriched)
-    if not mbm.empty:
-        pivot_mood_month = mbm.pivot_table(
-            index="primary_mood", columns="month_name", values="pct", fill_value=0
+    # --- Genre seasonality heatmap (month × genre) ---
+    st.subheader("Genre Seasonality — Monthly Heatmap")
+    st.caption("Percentage of plays per genre within each month (normalised)")
+    gbm = genre_by_month(df_enriched)
+    if not gbm.empty:
+        pivot_genre_month = gbm.pivot_table(
+            index="primary_genre", columns="month_name", values="pct", fill_value=0
         )
         month_order = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        pivot_mood_month = pivot_mood_month.reindex(columns=month_order, fill_value=0)
+        pivot_genre_month = pivot_genre_month.reindex(columns=month_order, fill_value=0)
         fig_hm = px.imshow(
-            pivot_mood_month,
-            labels=dict(x="Month", y="Mood", color="% of plays"),
+            pivot_genre_month,
+            labels=dict(x="Month", y="Genre", color="% of plays"),
             color_continuous_scale="Viridis",
             aspect="auto",
             text_auto=".1f",
         )
-        fig_hm.update_layout(template="plotly_dark", height=320, margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig_hm, use_container_width=True)
+        fig_hm.update_layout(template="plotly_dark", height=400, margin=dict(l=0, r=0, t=10, b=0))
+        st.plotly_chart(fig_hm, width="stretch")
 
-    # --- Mood by year stacked bar ---
-    st.subheader("Mood Evolution by Year")
-    mby = mood_by_year(df_enriched)
-    if not mby.empty:
-        fig_mby = px.bar(
-            mby, x="year", y="pct", color="primary_mood",
-            barmode="stack",
-            labels={"pct": "% of plays", "primary_mood": "Mood"},
-            color_discrete_sequence=px.colors.qualitative.Vivid,
-        )
-        fig_mby.update_layout(
-            template="plotly_dark",
-            xaxis_title="Year", yaxis_title="% of plays",
-            height=370, margin=dict(l=0, r=0, t=10, b=0),
-            legend=dict(orientation="h"),
-        )
-        st.plotly_chart(fig_mby, use_container_width=True)
-
-    # --- Genre by year stacked area ---
+    # --- Genre by year stacked bar ---
     st.subheader("Genre Evolution by Year")
     gby = genre_by_year(df_enriched)
     if not gby.empty:
-        fig_gby = px.area(
+        fig_gby = px.bar(
             gby, x="year", y="pct", color="primary_genre",
+            barmode="stack",
             labels={"pct": "% of plays", "primary_genre": "Genre"},
             color_discrete_sequence=px.colors.qualitative.Pastel,
         )
@@ -403,21 +391,66 @@ with tab4:
             height=370, margin=dict(l=0, r=0, t=10, b=0),
             legend=dict(orientation="h"),
         )
-        st.plotly_chart(fig_gby, use_container_width=True)
+        st.plotly_chart(fig_gby, width="stretch")
 
-    # --- Top tracks per mood ---
-    st.subheader("Top Tracks per Mood")
-    available_moods = sorted(df_enriched["primary_mood"].dropna().unique().tolist())
-    if available_moods:
-        selected_mood = st.selectbox("Select mood", options=available_moods)
-        top_tracks = top_tracks_per_mood(df_enriched, selected_mood, n=10)
+    # --- Genre by day of week + hour detail ---
+    st.subheader("Genre by Day of Week")
+    st.caption("Normalised genre share per day — select a day to drill into the hourly breakdown")
+
+    gbdow = genre_by_day_of_week(df_enriched)
+    if not gbdow.empty:
+        fig_dow = px.bar(
+            gbdow, x="day_of_week", y="pct", color="primary_genre",
+            barmode="stack",
+            labels={"pct": "% of plays", "primary_genre": "Genre", "day_of_week": ""},
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+        )
+        fig_dow.update_layout(
+            template="plotly_dark",
+            yaxis_title="% of plays",
+            height=360, margin=dict(l=0, r=0, t=10, b=0),
+            legend=dict(orientation="h"),
+        )
+        st.plotly_chart(fig_dow, width="stretch")
+
+    # Hour-of-day detail
+    st.subheader("Genre by Hour of Day")
+    days_available = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    selected_day = st.selectbox(
+        "Select day to inspect",
+        options=days_available,
+        index=days_available.index("Tuesday"),
+    )
+    gbh = genre_by_hour(df_enriched, day=selected_day)
+    if not gbh.empty:
+        fig_hour = px.bar(
+            gbh, x="hour", y="pct", color="primary_genre",
+            barmode="stack",
+            labels={"pct": "% of plays", "primary_genre": "Genre", "hour": "Hour of day"},
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+        )
+        fig_hour.update_layout(
+            template="plotly_dark",
+            xaxis=dict(tickmode="linear", tick0=0, dtick=1),
+            yaxis_title="% of plays",
+            height=360, margin=dict(l=0, r=0, t=10, b=0),
+            legend=dict(orientation="h"),
+        )
+        st.plotly_chart(fig_hour, width="stretch")
+
+    # --- Top tracks per genre ---
+    st.subheader("Top Tracks per Genre")
+    available_genres = sorted(df_enriched["primary_genre"].dropna().unique().tolist())
+    if available_genres:
+        selected_genre = st.selectbox("Select genre", options=available_genres)
+        top_tracks = top_tracks_per_genre(df_enriched, selected_genre, n=10)
         if top_tracks.empty:
-            st.info(f"No tracks found for mood '{selected_mood}'.")
+            st.info(f"No tracks found for genre '{selected_genre}'.")
         else:
             st.dataframe(
                 top_tracks.reset_index(drop=True),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
     else:
-        st.info("No mood data available in the current selection.")
+        st.info("No genre data available in the current selection.")
