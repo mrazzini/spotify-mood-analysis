@@ -16,6 +16,10 @@ import os
 import sys
 from pathlib import Path
 
+# Ensure project root is on sys.path so `src.*` imports work when the script
+# is invoked directly (e.g. `python src/data/lastfm_enricher.py`)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 import aiohttp
 import pandas as pd
 from dotenv import load_dotenv
