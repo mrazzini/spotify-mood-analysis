@@ -1,5 +1,7 @@
 # Spotify Mood Analysis
 
+🌐 **[View the Live Dashboard](https://spotify-mood-analysis.streamlit.app/)**
+
 ## 📌 Project Overview
 This project analyzes personal Spotify streaming data across 2012–2024 to explore listening patterns and their relationship with mood and emotional state. By enriching Spotify data with Last.fm genre and mood classifications, the analysis reveals temporal trends in music preferences, seasonal patterns in listening behavior, and how musical tastes evolve over time.
 
